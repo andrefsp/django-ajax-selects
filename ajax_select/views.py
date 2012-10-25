@@ -1,10 +1,11 @@
 
-from ajax_select import get_lookup
+from ajax_select import get_lookup, LookupChannel
 from django.contrib.admin import site
 from django.db import models
 from django.http import HttpResponse
 from django.utils import simplejson
 
+from django.views.generic import View
 
 def ajax_lookup(request,channel):
 
@@ -65,4 +66,30 @@ def add_popup(request,app_label,model):
         if 'opener.dismissAddAnotherPopup' in response.content:
             return HttpResponse( response.content.replace('dismissAddAnotherPopup','didAddPopup' ) )
     return response
+
+
+
+class AjaxLookupView(View, LookupChannel):
+    """
+    This object is a Mixin between a normal Django View and a LookupChannel so
+    it we can bypass the lookup Channels
+    """
+
+    http_method_names = ['get',]
+
+    def get(self, *args, **kwargs):
+        search_term = self.request.GET.get('term', None)
+        if not search_term:
+            return simplejson.dumps({})
+
+        instances = self.get_query(search_term, self.request)
+        results = simplejson.dumps([
+            {
+                'pk': unicode(getattr(item,'pk',None)),
+                'value': self.get_result(item),
+                'match' : self.format_match(item),
+                'repr': self.format_item_display(item)
+            } for item in instances
+        ])
+        return HttpResponse(results, mimetype='application/javascript')
 
