@@ -3,7 +3,13 @@
 from django import forms
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+
+from django.core.urlresolvers import reverse_lazy
+
 from ajax_select.fields import AutoCompleteField
+
+from ajax_select.views import AjaxLookupView
+from example.models import Person
 
 
 class SearchForm(forms.Form):
@@ -16,6 +22,17 @@ class SearchForm(forms.Form):
             attrs={'size': 100}
             )
 
+    t = AutoCompleteField(
+            'personsearch',
+            required=True,
+            help_text="One more search",
+            label="person",
+            attrs={'size': 100},
+            plugin_options={'source': reverse_lazy('person-search')}
+            )
+
+
+
 def search_form(request):
 
     dd = {}
@@ -25,3 +42,13 @@ def search_form(request):
     form = SearchForm(initial=initial)
     dd['form'] = form
     return render_to_response('search_form.html',dd,context_instance=RequestContext(request))
+
+
+
+class PersonAjaxLookupView(AjaxLookupView):
+    """
+    Person class serch
+    """
+    model = Person
+    search_field = 'name'
+

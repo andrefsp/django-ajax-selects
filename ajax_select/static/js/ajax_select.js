@@ -133,6 +133,7 @@ window.addAutoComplete = function (prefix_id, callback ) { /*(html_id)*/
 	/* detects inline forms and converts the html_id if needed */
 	var prefix = 0;
 	var html_id = prefix_id;
+
 	if(html_id.indexOf("__prefix__") != -1) {
 		// Some dirty loop to find the appropriate element to apply the callback to
 		while ($('#'+html_id).length) {

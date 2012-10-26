@@ -76,6 +76,7 @@ class AjaxLookupView(View, LookupChannel):
     """
 
     http_method_names = ['get',]
+    search_field = ''
 
     def get(self, *args, **kwargs):
         search_term = self.request.GET.get('term', None)

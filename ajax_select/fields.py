@@ -354,11 +354,13 @@ def _check_can_add(self,user,model):
         can_add = user.has_perm("%s.add_%s" % (ctype.app_label,ctype.model))
     if can_add:
         self.widget.add_link = reverse('add_popup',
-            kwargs={'app_label':model._meta.app_label,'model':model._meta.object_name.lower()})
+            kwargs={'app_label':model._meta.app_label,
+                'model':model._meta.object_name.lower()})
 
 
 def autoselect_fields_check_can_add(form,model,user):
-    """ check the form's fields for any autoselect fields and enable their widgets with + sign add links if permissions allow"""
+    """ check the form's fields for any autoselect fields and enable their
+    widgets with + sign add links if permissions allow"""
     for name,form_field in form.declared_fields.iteritems():
         if isinstance(form_field,(AutoCompleteSelectMultipleField,AutoCompleteSelectField)):
             db_field = model._meta.get_field_by_name(name)[0]
@@ -376,7 +378,10 @@ def plugin_options(channel,channel_name,widget_plugin_options,initial):
         # will deprecate that some day and prefer to use plugin_options
         po['min_length'] = getattr(channel, 'min_length', 1)
     if not po.get('source'):
-        po['source'] = reverse('ajax_lookup',kwargs={'channel':channel_name})
+        po['source'] = reverse('ajax_lookup', kwargs={'channel':channel_name})
+    else:
+        # make sure any reverse or reverse_lazy becomes a string to serialize
+        po['source'] = str(po['source'])
     return {
         'plugin_options': mark_safe(simplejson.dumps(po)),
         # continue to support any custom templates that still expect these
